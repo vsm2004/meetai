@@ -12,7 +12,12 @@ const Page = async () => {
     redirect("/sign-in");
   }
 
-  return <HomeView />;
+  return (
+    <div className="p-6 text-xl">
+      Welcome to Meet.AI Dashboard
+      <HomeView />
+    </div>
+  );
 };
 
 export default Page;

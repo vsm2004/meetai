@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { OctagonAlertIcon } from "lucide-react";
 import Link from "next/link";
 import { z } from "zod";
+import {FaGithub, FaGoogle} from "react-icons/fa"
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -20,7 +21,6 @@ import {
 } from "@/components/ui/form";
 import { authClient } from "@/lib/auth-client";
 
-
 // ---------------- SCHEMA ----------------
 const FormSchema = z
     .object({
@@ -34,7 +34,6 @@ const FormSchema = z
         path: ["confirmPassword"],
     });
 // ------------------------------------------------
-
 
 export const SignUpview = () => {
     const router = useRouter();
@@ -51,7 +50,7 @@ export const SignUpview = () => {
         },
     });
 
-    // ---------------- HANDLER ----------------
+    // ----------- SIGN UP HANDLER ----------
     const onSubmit = async (data: z.infer<typeof FormSchema>) => {
         setError(null);
         setPending(true);
@@ -64,7 +63,6 @@ export const SignUpview = () => {
             },
             {
                 onSuccess: async () => {
-                    // Auto login after signup
                     await authClient.signIn.email({
                         email: data.email,
                         password: data.password,
@@ -80,6 +78,29 @@ export const SignUpview = () => {
                 }
             }
         );
+    };
+
+    // ----------- SOCIAL LOGIN HANDLER ----------
+    const onSocial = (provider: "github" | "google") => {
+        setError(null);
+        setPending(true);
+
+        authClient.signIn.social(
+                        {
+                            provider:provider,
+                            callbackURL: "/",
+                        },
+                        {
+                            onSuccess: async () => {
+                                setPending(false);
+                            },
+            
+                            onError: ({ error }) => {
+                                setPending(false);
+                                setError(error.message);
+                            }
+                        }
+                    );
     };
     // ------------------------------------------------
 
@@ -111,11 +132,7 @@ export const SignUpview = () => {
                                             <FormItem>
                                                 <FormLabel>Name</FormLabel>
                                                 <FormControl>
-                                                    <input
-                                                        type="text"
-                                                        placeholder="Vincent Vega"
-                                                        {...field}
-                                                    />
+                                                    <input type="text" placeholder="Vincent Vega" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -130,11 +147,7 @@ export const SignUpview = () => {
                                             <FormItem>
                                                 <FormLabel>Email</FormLabel>
                                                 <FormControl>
-                                                    <input
-                                                        type="email"
-                                                        placeholder="m@example.com"
-                                                        {...field}
-                                                    />
+                                                    <input type="email" placeholder="m@example.com" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -149,11 +162,7 @@ export const SignUpview = () => {
                                             <FormItem>
                                                 <FormLabel>Password</FormLabel>
                                                 <FormControl>
-                                                    <input
-                                                        type="password"
-                                                        placeholder="*******"
-                                                        {...field}
-                                                    />
+                                                    <input type="password" placeholder="*******" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
@@ -168,20 +177,15 @@ export const SignUpview = () => {
                                             <FormItem>
                                                 <FormLabel>Confirm Password</FormLabel>
                                                 <FormControl>
-                                                    <input
-                                                        type="password"
-                                                        placeholder="*******"
-                                                        {...field}
-                                                    />
+                                                    <input type="password" placeholder="*******" {...field} />
                                                 </FormControl>
                                                 <FormMessage />
                                             </FormItem>
                                         )}
                                     />
-
                                 </div>
 
-                                {/* ERROR MESSAGE */}
+                                {/* ERROR */}
                                 {!!error && (
                                     <Alert className="bg-destructive/10 border-none">
                                         <OctagonAlertIcon className="h-4 w-4 text-destructive" />
@@ -189,7 +193,7 @@ export const SignUpview = () => {
                                     </Alert>
                                 )}
 
-                                {/* SUBMIT BUTTON */}
+                                {/* SUBMIT */}
                                 <Button disabled={pending} type="submit" className="w-full">
                                     {pending ? "Signing Up..." : "Sign Up"}
                                 </Button>
@@ -202,13 +206,26 @@ export const SignUpview = () => {
                                     <div className="absolute inset-0 top-1/2 border-t border-border" />
                                 </div>
 
-                                {/* OAUTH BUTTONS */}
+                                {/* SOCIAL BUTTONS */}
                                 <div className="grid grid-cols-2 gap-4">
-                                    <Button disabled={pending} variant="outline" type="button" className="w-full">
-                                        Google
+                                    <Button
+                                        disabled={pending}
+                                        variant="outline"
+                                        type="button"
+                                        className="w-full"
+                                        onClick={() => onSocial("github")}
+                                    >
+                                        <FaGithub />
                                     </Button>
-                                    <Button disabled={pending} variant="outline" type="button" className="w-full">
-                                        GitHub
+
+                                    <Button
+                                        disabled={pending}
+                                        variant="outline"
+                                        type="button"
+                                        className="w-full"
+                                        onClick={() => onSocial("google")}
+                                    >
+                                        <FaGoogle />
                                     </Button>
                                 </div>
 
@@ -224,7 +241,7 @@ export const SignUpview = () => {
                         </form>
                     </Form>
 
-                    {/* RIGHT SIDE IMAGE */}
+                    {/* RIGHT SIDE PANEL */}
                     <div className="bg-green-700 relative flex flex-col gap-y-4 items-center justify-center">
                         <img src="logo.svg" alt="Image" className="h-[92px] w-[92px]" />
                         <p className="text-2xl font-semibold text-white">Meet.AI</p>
