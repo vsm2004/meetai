@@ -11,6 +11,8 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@dicebear/collection": "^9.2.4",
+    "@dicebear/core": "^9.2.4",
     "@eslint/eslintrc": "^3",
     "@hookform/resolvers": "^5.2.2",
     "@neondatabase/serverless": "^1.0.2",
