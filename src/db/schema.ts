@@ -1,4 +1,6 @@
+import { primaryKey } from "drizzle-orm/gel-core";
 import { text, timestamp, integer, pgTable, boolean } from "drizzle-orm/pg-core";
+import { nanoid } from "nanoid";
 
 // Better Auth generates STRING ids — so use TEXT for the id
 export const user = pgTable("user", {
@@ -46,3 +48,15 @@ export const verification = pgTable("verification", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
+export const agents=pgTable("agents",{
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(()=>nanoid()),
+  name: text("name").notNull(),
+  userid:text("user_id")
+    .notNull()
+    .references(()=>user.id,{onDelete:"cascade"}),
+  instructions:text("instructions").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+})
