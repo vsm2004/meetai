@@ -23,6 +23,7 @@ interface ResponsiveDialogProps {
   children: React.ReactNode;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  className?: string;
 }
 
 export const ResponsiveDialog = ({
@@ -31,6 +32,7 @@ export const ResponsiveDialog = ({
   children,
   open,
   onOpenChange,
+  className,
 }: ResponsiveDialogProps) => {
   const isMobile = useIsMobile();
 
@@ -50,7 +52,12 @@ export const ResponsiveDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent
+  className={[
+    "w-auto max-w-none h-auto",
+    className,
+  ].join(" ")}
+>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
