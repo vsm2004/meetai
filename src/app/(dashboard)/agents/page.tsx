@@ -5,8 +5,15 @@ import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { SearchParams } from "nuqs";
+import { loadSearchParams } from "@/modules/agents/params";
 
-const Page = async () => {
+interface Props {
+  searchParams: Promise<SearchParams>
+}
+
+const Page = async ({ searchParams }: Props) => {
+  const params = await loadSearchParams(searchParams);
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -19,7 +26,9 @@ const Page = async () => {
   // ✅ Only runs for authenticated users
   const queryClient = getQueryClient();
   await queryClient.prefetchQuery(
-    trpc.agents.getMany.queryOptions()
+    trpc.agents.getMany.queryOptions({
+      ...params
+    })
   );
 
   return (
