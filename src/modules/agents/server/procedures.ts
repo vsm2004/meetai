@@ -5,7 +5,16 @@ import {
   createTRPCRouter,
   protectedProcedure,
 } from "@/trpc/init";
-import { count, desc, ilike, and, eq } from "drizzle-orm";
+import { 
+  count, 
+  desc, 
+  ilike, 
+  and, 
+  eq, 
+  getTableColumns,
+  sql
+} from "drizzle-orm";
+
 import { TRPCError } from "@trpc/server";
 import { agentsInsertSchema } from "../schemas";
 import {
@@ -25,9 +34,24 @@ export const agentsRouter = createTRPCRouter({
     .query(async ({ input, ctx }) => {
       try {
         const [existingAgent] = await db
-          .select()
+          .select({
+            ...getTableColumns(agents),
+            meetingCount: sql<number>`5`,
+          })
           .from(agents)
-          .where(eq(agents.id, input.id));
+          .where(
+            and(
+              eq(agents.id, input.id),
+              eq(agents.userid, ctx.auth.user.id)
+            )
+          );
+
+        if (!existingAgent) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Agent not found",
+          });
+        }
 
         return existingAgent;
       } catch (error) {
@@ -79,10 +103,10 @@ export const agentsRouter = createTRPCRouter({
               search ? ilike(agents.name, `%${search}%`) : undefined
             )
           );
-          const totalPages = Math.ceil(total.count/pageSize);
-          return { items:data, total: total.count, totalPages };
 
-        return data;
+        const totalPages = Math.ceil(total.count / pageSize);
+
+        return { items: data, total: total.count, totalPages };
       } catch (error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
