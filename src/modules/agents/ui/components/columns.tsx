@@ -48,10 +48,10 @@ export const columns: ColumnDef<AgentGetOne>[] = [
     header: "Meetings",
     cell: ({ row }) => {
       const agent = row.original as {
-        meeting?: { count: number };
+        meetingCount: number;
       };
 
-      const count = agent.meeting?.count ?? 0;
+      const count = agent.meetingCount ?? 0;
 
       return (
         <Badge

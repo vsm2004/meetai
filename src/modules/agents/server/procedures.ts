@@ -123,7 +123,10 @@ export const agentsRouter = createTRPCRouter({
 
       try {
         const data = await db
-          .select()
+          .select({
+            ...getTableColumns(agents),
+            meetingCount: sql<number>`5`,
+          })
           .from(agents)
           .where(
             and(

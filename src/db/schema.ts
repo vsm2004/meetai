@@ -1,4 +1,3 @@
-import { primaryKey } from "drizzle-orm/gel-core";
 import { text, timestamp, integer, pgTable, boolean, pgEnum } from "drizzle-orm/pg-core";
 import { nanoid } from "nanoid";
 
