@@ -1,6 +1,6 @@
 import { db } from "@/db"; 
 import z from "zod";
-import { meetings } from "@/db/schema";
+import { meetings, agents } from "@/db/schema";
 import {
   createTRPCRouter,
   protectedProcedure,
@@ -21,8 +21,67 @@ import {
   MAX_PAGE_SIZE,
   MIN_PAGE_SIZE,
 } from "@/constants";
+import { meetingsInsertSchema } from "../schemas";
 
 export const meetingsRouter = createTRPCRouter({
+  update: protectedProcedure
+  .input(
+    meetingsInsertSchema.extend({
+      id: z.string(),
+    })
+  )
+  .mutation(async ({ input, ctx }) => {
+    const { id, ...values } = input;
+
+    const [updatedMeeting] = await db
+      .update(meetings)
+      .set(values)
+      .where(
+        and(
+          eq(meetings.id, id),
+          eq(meetings.userid, ctx.auth.user.id)
+        )
+      )
+      .returning();
+
+    if (!updatedMeeting) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Meeting not found",
+      });
+    }
+
+    return updatedMeeting;
+  }),
+
+  create: protectedProcedure
+      .input(meetingsInsertSchema)
+      .mutation(async ({ input, ctx }) => {
+        // Fetch the agent to get instructions
+        const [updatedMeeting] = await db
+          .select({ instructions: agents.instructions })
+          .from(agents)
+          .where(eq(agents.id, input.agentId))
+          .limit(1);
+
+        if (!updatedMeeting) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "Meeting doesn't exist",
+          });
+        }
+
+        const [createdMeeting] = await db
+          .insert(meetings)
+          .values({
+            ...input,
+            userid: ctx.auth.user.id,
+            instructions: updatedMeeting.instructions,
+          })
+          .returning();
+  
+        return createdMeeting;
+      }),
   getOne: protectedProcedure
     .input(
       z.object({
