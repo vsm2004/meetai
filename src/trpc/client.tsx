@@ -16,9 +16,11 @@ let browserQueryClient: QueryClient | undefined;
 
 function getQueryClient() {
   if (typeof window === 'undefined') {
+    // Server: always create a new client
     return makeQueryClient();
   }
 
+  // Browser: reuse the same client
   if (!browserQueryClient) {
     browserQueryClient = makeQueryClient();
   }
@@ -47,15 +49,12 @@ export function TRPCReactProvider({
         httpBatchLink({
           url: getUrl(),
 
-          // ✅ FIXED: explicitly cast to RequestInit
+          // 🔑 THIS IS THE IMPORTANT PART
           fetch(url, options) {
-            return fetch(
-              url,
-              {
-                ...(options as RequestInit),
-                credentials: 'include',
-              },
-            );
+            return fetch(url, {
+              ...(options as RequestInit),
+              credentials: 'include', // <-- sends auth cookies
+            });
           },
         }),
       ],
