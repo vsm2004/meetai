@@ -48,21 +48,3 @@ export const MeetingsView = () => {
     </div>
   );
 };
-
-export const MeetingsViewLoading = () => {
-  return (
-    <LoadingState
-      title="Loading meetings"
-      description="This may take a few seconds"
-    />
-  );
-};
-
-export const MeetingsViewError = () => {
-  return (
-    <ErrorState
-      title="Error loading meetings"
-      description="Please try again later"
-    />
-  );
-};
